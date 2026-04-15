@@ -5,6 +5,7 @@ import com.smartcampus.model.Sensor;
 import com.smartcampus.model.SensorReading;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class DataStore {
 
     // Room operations
     public Map<String, Room> getRooms() {
-        return rooms;
+        return Collections.unmodifiableMap(rooms);
     }
 
     public Room getRoom(String id) {
@@ -50,7 +51,7 @@ public class DataStore {
 
     // Sensor operations
     public Map<String, Sensor> getSensors() {
-        return sensors;
+        return Collections.unmodifiableMap(sensors);
     }
 
     public Sensor getSensor(String id) {
@@ -67,7 +68,7 @@ public class DataStore {
 
     // Sensor reading operations
     public List<SensorReading> getReadings(String sensorId) {
-        return sensorReadings.getOrDefault(sensorId, new ArrayList<>());
+        return Collections.unmodifiableList(sensorReadings.getOrDefault(sensorId, new ArrayList<>()));
     }
 
     public SensorReading addReading(String sensorId, SensorReading reading) {
