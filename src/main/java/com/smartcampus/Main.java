@@ -9,14 +9,13 @@ import java.net.URI;
 
 public final class Main {
 
-    private static final String HOST = "http://localhost";
-    private static final int PORT = 8080;
+    private static final String BASE_URI = "http://localhost:8080/";
 
     private Main() {
     }
 
     public static HttpServer startServer() {
-        URI baseUri = URI.create(String.format("%s:%d/%s/", HOST, PORT, ApplicationConfig.BASE_PATH));
+        URI baseUri = URI.create(BASE_URI);
         return GrizzlyHttpServerFactory.createHttpServer(baseUri, new ApplicationConfig());
     }
 
