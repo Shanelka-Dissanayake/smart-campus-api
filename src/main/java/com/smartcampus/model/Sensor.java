@@ -4,15 +4,14 @@ public class Sensor {
 
     private String id;
     private String type;
-    private SensorStatus status;
+    private String status;
     private double currentValue;
     private String roomId;
 
     public Sensor() {
-        this.status = SensorStatus.OFFLINE;
     }
 
-    public Sensor(String id, String type, SensorStatus status, double currentValue, String roomId) {
+    public Sensor(String id, String type, String status, double currentValue, String roomId) {
         this.id = id;
         this.type = type;
         this.status = status;
@@ -36,11 +35,11 @@ public class Sensor {
         this.type = type;
     }
 
-    public SensorStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(SensorStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
