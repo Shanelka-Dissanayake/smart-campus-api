@@ -3,6 +3,7 @@ package com.smartcampus.resource;
 import com.smartcampus.model.Room;
 import com.smartcampus.service.DataStore;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -48,7 +49,9 @@ public class RoomResource {
 
         synchronized (DataStore.rooms) {
             if (DataStore.rooms.containsKey(roomId)) {
-                return badRequest("Room with id '" + roomId + "' already exists");
+                return Response.status(Response.Status.CONFLICT)
+                        .entity(errorBody("Room already exists"))
+                        .build();
             }
             room.setId(roomId);
             room.setName(room.getName().trim());
@@ -69,6 +72,27 @@ public class RoomResource {
                     .build();
         }
         return Response.ok(room).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteRoom(@PathParam("id") String id) {
+        Room room;
+        synchronized (DataStore.rooms) {
+            room = DataStore.rooms.get(id);
+            if (room == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(errorBody("Room not found"))
+                        .build();
+            }
+
+            if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
+                throw new RuntimeException("Room has sensors");
+            }
+
+            DataStore.rooms.remove(id);
+        }
+        return Response.noContent().build();
     }
 
     private Response validateRoomPayload(Room room) {
