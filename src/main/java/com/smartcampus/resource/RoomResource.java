@@ -1,6 +1,8 @@
 package com.smartcampus.resource;
 
+import com.smartcampus.exception.RoomNotEmptyException;
 import com.smartcampus.model.Room;
+import com.smartcampus.model.Sensor;
 import com.smartcampus.service.DataStore;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -77,22 +79,43 @@ public class RoomResource {
     @DELETE
     @Path("/{id}")
     public Response deleteRoom(@PathParam("id") String id) {
+        String roomId = id == null ? null : id.trim();
+        if (isBlank(roomId)) {
+            return badRequest("Path parameter 'id' is required");
+        }
+
         Room room;
         synchronized (DataStore.rooms) {
-            room = DataStore.rooms.get(id);
+            room = DataStore.rooms.get(roomId);
             if (room == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(errorBody("Room not found"))
                         .build();
             }
 
-            if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
-                throw new RuntimeException("Room has sensors");
+            if (hasSensors(roomId, room)) {
+                throw new RoomNotEmptyException("Room contains sensors and cannot be deleted");
             }
 
-            DataStore.rooms.remove(id);
+            DataStore.rooms.remove(roomId);
         }
         return Response.noContent().build();
+    }
+
+    private boolean hasSensors(String roomId, Room room) {
+        if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
+            return true;
+        }
+
+        synchronized (DataStore.sensors) {
+            for (Sensor sensor : DataStore.sensors.values()) {
+                if (roomId.equals(sensor.getRoomId())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private Response validateRoomPayload(Room room) {
