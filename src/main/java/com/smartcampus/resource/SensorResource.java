@@ -1,5 +1,6 @@
 package com.smartcampus.resource;
 
+import com.smartcampus.exception.LinkedResourceNotFoundException;
 import com.smartcampus.model.Room;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.service.DataStore;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -24,11 +26,17 @@ import java.util.Map;
 public class SensorResource {
 
     @GET
-    public Response getAllSensors() {
+    public Response getAllSensors(@QueryParam("type") String type) {
         List<Sensor> sensors;
         synchronized (DataStore.sensors) {
             sensors = new ArrayList<>(DataStore.sensors.values());
         }
+
+        if (type != null && !type.trim().isEmpty()) {
+            String normalizedType = type.trim();
+            sensors.removeIf(sensor -> sensor.getType() == null || !sensor.getType().equalsIgnoreCase(normalizedType));
+        }
+
         return Response.ok(sensors).build();
     }
 
@@ -45,7 +53,7 @@ public class SensorResource {
         synchronized (DataStore.rooms) {
             Room room = DataStore.rooms.get(roomId);
             if (room == null) {
-                return badRequest("Field 'roomId' must reference an existing room");
+                throw new LinkedResourceNotFoundException("Field 'roomId' must reference an existing room");
             }
 
             synchronized (DataStore.sensors) {
@@ -113,6 +121,11 @@ public class SensorResource {
         }
 
         return Response.noContent().build();
+    }
+
+    @Path("/{id}/readings")
+    public SensorReadingResource sensorReadings(@PathParam("id") String id) {
+        return new SensorReadingResource(id);
     }
 
     private Response validateSensorPayload(Sensor sensor) {
