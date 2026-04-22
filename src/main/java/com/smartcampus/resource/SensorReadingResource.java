@@ -35,8 +35,6 @@ public class SensorReadingResource {
                     .build();
         }
 
-        ensureSensorAvailable(sensor);
-
         List<SensorReading> readings;
         synchronized (DataStore.readings) {
             List<SensorReading> existing = DataStore.readings.get(sensorId);

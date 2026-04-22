@@ -2,9 +2,12 @@ package com.smartcampus.model;
 
 public class Sensor {
 
+    public static final String STATUS_ACTIVE = "ACTIVE";
+    public static final String STATUS_MAINTENANCE = "MAINTENANCE";
+
     private String id;
     private String type;
-    private String status;
+    private String status = STATUS_ACTIVE;
     private double currentValue;
     private String roomId;
 
@@ -14,7 +17,7 @@ public class Sensor {
     public Sensor(String id, String type, String status, double currentValue, String roomId) {
         this.id = id;
         this.type = type;
-        this.status = status;
+        setStatus(status);
         this.currentValue = currentValue;
         this.roomId = roomId;
     }
@@ -40,7 +43,17 @@ public class Sensor {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        if (status == null || status.trim().isEmpty()) {
+            this.status = STATUS_ACTIVE;
+            return;
+        }
+
+        if (status.equalsIgnoreCase(STATUS_MAINTENANCE)) {
+            this.status = STATUS_MAINTENANCE;
+            return;
+        }
+
+        this.status = STATUS_ACTIVE;
     }
 
     public double getCurrentValue() {

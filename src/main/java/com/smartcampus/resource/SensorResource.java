@@ -65,6 +65,7 @@ public class SensorResource {
 
                 sensor.setId(sensorId);
                 sensor.setRoomId(roomId);
+                sensor.setStatus(normalizeStatus(sensor.getStatus()));
                 DataStore.sensors.put(sensorId, sensor);
             }
 
@@ -138,7 +139,19 @@ public class SensorResource {
         if (isBlank(sensor.getRoomId())) {
             return badRequest("Field 'roomId' is required");
         }
+        if (!isBlank(sensor.getStatus())
+                && !sensor.getStatus().equalsIgnoreCase(Sensor.STATUS_ACTIVE)
+                && !sensor.getStatus().equalsIgnoreCase(Sensor.STATUS_MAINTENANCE)) {
+            return badRequest("Field 'status' must be either ACTIVE or MAINTENANCE");
+        }
         return null;
+    }
+
+    private String normalizeStatus(String status) {
+        if (isBlank(status) || status.equalsIgnoreCase(Sensor.STATUS_ACTIVE)) {
+            return Sensor.STATUS_ACTIVE;
+        }
+        return Sensor.STATUS_MAINTENANCE;
     }
 
     private boolean isBlank(String value) {
